@@ -8,11 +8,7 @@ import {
 import { cli } from 'cleye';
 import { description, version } from '../package.json';
 import {
-	getConfig,
-	assertGitRepo,
-	getStagedDiff,
-	getDetectedMessage,
-	generateCommitMessage,
+	getConfig, assertGitRepo, getStagedDiff, getDetectedMessage, generateCommitMessage,
 } from './utils.js';
 
 const argv = cli({
@@ -47,9 +43,7 @@ const argv = cli({
 		throw new Error('No staged changes found. Make sure to stage your changes with `git add`.');
 	}
 
-	detectingFiles.stop(`${getDetectedMessage(staged.files)}:\n${
-		staged.files.map(file => `     ${file}`).join('\n')
-	}`);
+	detectingFiles.stop(`${getDetectedMessage(staged.files)}:\n${staged.files.map(file => `     ${file}`).join('\n')}`);
 
 	const config = await getConfig();
 	const OPENAI_KEY = process.env.OPENAI_KEY ?? process.env.OPENAI_API_KEY ?? config.OPENAI_KEY;
@@ -59,11 +53,7 @@ const argv = cli({
 
 	const s = spinner();
 	s.start('The AI is analyzing your changes');
-	const messages = await generateCommitMessage(
-		OPENAI_KEY,
-		staged.diff,
-		argv.flags.generate,
-	);
+	const messages = await generateCommitMessage(OPENAI_KEY, staged.diff, argv.flags.generate);
 	s.stop('Changes analyzed');
 
 	let message;
@@ -91,7 +81,7 @@ const argv = cli({
 		message = selected;
 	}
 
-	await execa('git', ['commit', '-m', message]);
+	await execa('git', ['commit', '-m', message, '--no-verify']);
 
 	outro(`${green('✔')} Successfully committed!`);
 })().catch((error) => {
